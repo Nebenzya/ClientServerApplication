@@ -1,50 +1,36 @@
 ﻿using System.Data.SqlClient; // устанавливается через диспетчер пакетов NuGet
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
+using ServerClass;
 
-
-Console.WriteLine("Добро пожаловать в настройки сервера CSA!\nВсе доступные команды можно узнать с помощью команды help");
+Console.WriteLine("Добро пожаловать в настройки сервера CSA!\nВсе доступные команды можно узнать с помощью команды help\n\n");
 while (true)
 {
     Console.Write("Введите команду: ");
     CheckCommand(Console.ReadLine());
 }
 
-
-#region Socket
-string ip = "127.0.0.1"; 
-int port = 8080;
-
-IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-#endregion // Socket
-
-
+//обрабатывает ввод пользователя на соответствие команд
 void CheckCommand(string command)
 {
     switch (command.ToLower())
     {
         case ("help"):
             Console.WriteLine("Доступные команды: \nhelp - список доступных команд" +
-                              "\nset ip - устанавливаем IP адресс для сервера" +
-                              "\nset port - устанавливаем порт для сервера" +
-                              "\nexit - завершить программу CSA");
+                              "\nset ip/port - устанавливаем значение для конкретных полей" +
+                              "\nexit - завершить программу CSA\n");
             break;
         case ("set ip"):
             Console.Write("Введите IP адресс: ");
-            ip = Console.ReadLine();
+            ConnectSoket.IP = Console.ReadLine();
             break;
         case ("set port"):
             Console.Write("Введите порт: ");
-            port = Int32.Parse(Console.ReadLine());
+            ConnectSoket.Port = Int32.Parse(Console.ReadLine());
             break;
-
         case ("exit"):
             Environment.Exit(0);
             break;
         default:
-            Console.WriteLine($"Неизвестная команда \"{command}\". Повторите запрос...");
+            Console.WriteLine($"Неизвестная команда \"{command}\". Повторите запрос...\n");
             break;
     }
 }
