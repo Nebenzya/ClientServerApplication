@@ -3,11 +3,10 @@ using System.Net.Sockets;
 
 namespace ServerClass
 {
-    internal static class ConnectSoket
+    internal static class MyServer
     {
         private static string ip = String.Empty;
         private static int port = 0;
-        private static Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         public static string IP
         {
@@ -33,7 +32,33 @@ namespace ServerClass
 
             }
         }
-        //static IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+        static private Socket ConnectSocket()
+        {
+            try
+            {
+                static Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                // связываем сокет с точкой сервера, по которой будем принимать данные
+                static IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+                socket.Bind(ipPoint);
+
+                if (socket.Connect)
+                {
+                    return socket;
+                }
+                else
+                {
+                    System.Console.WriteLine("Не получилось установить точку доступа! Проверьте настройки подключения...");
+                    return null;
+                }
+
+            }
+            catch (System.Exception message)
+            {
+                System.Console.WriteLine($"Ошибка подключения: {message}");
+            }
+        }
     }
     
 
