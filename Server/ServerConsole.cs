@@ -20,14 +20,17 @@ void CheckCommand(string command)
             break;
         case ("set ip"):
             Console.Write("Введите IP адресс: ");
-            ConnectSoket.IP = Console.ReadLine();
+            MyServer.IP = Console.ReadLine();
             break;
         case ("set port"):
             Console.Write("Введите порт: ");
-            ConnectSoket.Port = Int32.Parse(Console.ReadLine());
+            MyServer.Port = Int32.Parse(Console.ReadLine());
             break;
         case ("exit"):
             Environment.Exit(0);
+            break;
+        case ("start"):
+            MyServer.Start(1);
             break;
         default:
             Console.WriteLine($"Неизвестная команда \"{command}\". Повторите запрос...\n");
