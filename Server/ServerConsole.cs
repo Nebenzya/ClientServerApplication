@@ -15,8 +15,13 @@ void CheckCommand(string command)
     {
         case ("help"):
             Console.WriteLine("Доступные команды: \nhelp - список доступных команд" +
+                              "\ninfo - узнать текущие параметры сервера" +
                               "\nset ip/port - устанавливаем значение для конкретных полей" +
+                              "\nstart - запустить сервер" +
                               "\nexit - завершить программу CSA\n");
+            break;
+        case ("info"):
+            MyServer.Info();
             break;
         case ("set ip"):
             Console.Write("Введите IP адресс: ");

@@ -19,6 +19,8 @@ namespace ServerClass
                     ip = value;
                     Console.WriteLine($"IP адресс успешно изменён на: {ip}\n");
                 }
+                else
+                    Console.WriteLine($"IP адресс не удалось изменить на: {value}\n");
             }
         }
 
@@ -35,6 +37,11 @@ namespace ServerClass
                 else Console.WriteLine("Неверный значение для порта. Корректное значение в диапазоне 0-65535\n");
 
             }
+        }
+
+        static public void Info()
+        {
+            Console.WriteLine($"ip:\t{IP}\nport:\t{Port}\n");
         }
 
         static private Socket ConnectSocket()
