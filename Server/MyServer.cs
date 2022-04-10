@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Text;
+using System.Net;
 using System.Net.Sockets;
 
 namespace ServerClass
@@ -13,7 +14,8 @@ namespace ServerClass
             get => ip;
             set
             {
-                IPAddress forCheck = null;
+                IPAddress forCheck = null; // заглушка для метода TryParse
+
                 if (IPAddress.TryParse(value,out forCheck))
                 {
                     ip = value;
@@ -34,8 +36,8 @@ namespace ServerClass
                     port = value;
                     Console.WriteLine($"Порт успешно изменён на: {port}\n");
                 }
-                else Console.WriteLine("Неверный значение для порта. Корректное значение в диапазоне 0-65535\n");
-
+                else 
+                    Console.WriteLine("Неверный значение для порта. Корректное значение в диапазоне 0-65535\n");
             }
         }
 
@@ -46,58 +48,76 @@ namespace ServerClass
 
         static private Socket ConnectSocket()
         {
-            try
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            // связываем сокет с локальной точкой сервера, по которой будем принимать данные
+            IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+            socket.Bind(ipPoint);
+
+            if (socket != null)
             {
-                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                // связываем сокет с точкой сервера, по которой будем принимать данные
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-                socket.Bind(ipPoint);
-
-                if (socket != null)
-                {
-                    return socket;
-                }
-                else
-                {
-                    System.Console.WriteLine("Не получилось установить точку доступа! Проверьте настройки подключения...");
-                    return null;
-                }
-
+                return socket;
             }
-            catch (System.Exception message)
+            else
             {
-                System.Console.WriteLine($"Ошибка подключения: {message}\n");
+                System.Console.WriteLine("Не получилось установить точку доступа! Проверьте настройки подключения...");
                 return null;
             }
         }
+
+        // запускаем сервер и ставим в режим прослушивания
         static public void Start(int queue)
         {
-            Socket socket = ConnectSocket();
-            
             try
             {
+                Socket socket = ConnectSocket();
+
                 if (socket != null)
                 {
+                    // начинаем прослушивание с ограничением очереди
                     socket.Listen(queue);
                     Console.WriteLine("Сервер запущен. Ожидание подключения пользователя...");
-                    while (true)
-                    {
-                        socket.Accept();
+                    ListenTo(socket);
+                }                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка на этапе подключения сервера: {ex.Message}");
+            }
+        }
 
-                        socket.Shutdown(SocketShutdown.Both);
-                        socket.Close();
+        static private void ListenTo(Socket socket)
+        {
+            try
+            {
+                while (true)
+                {
+                    // режим ожидания нового подключения
+                    Socket listener = socket.Accept();
+
+                    var message = new StringBuilder(); // для приёма сообщений
+                    byte[] data = new byte[256]; // буфер для получаемых данных
+
+                    do
+                    {
+                        int bytes = listener.Receive(data); // количество полученных байтов
+                        message.Append(Encoding.Unicode.GetString(data, 0, bytes));
                     }
+                    while (listener.Available > 0);
+                    Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {message.ToString()}");
+
+                    listener.Send(Encoding.Unicode.GetBytes("Сообщение получено")); // отправляем результат
+
+                    // закрываем и отключаем соединение
+                    listener.Shutdown(SocketShutdown.Both);
+                    listener.Close();
                 }
             }
-            catch (Exception message)
+            catch (Exception ex)
             {
-                Console.WriteLine(message);
+                Console.WriteLine($"Ошибка на этапе прослушивания: {ex.Message}");
             }
-            
-
         }
     }
-    
 }
 
