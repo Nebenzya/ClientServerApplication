@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace ServerClass
+namespace Server
 {
     internal static class MyServer
     {
@@ -96,12 +96,12 @@ namespace ServerClass
                     Socket listener = socket.Accept();
 
                     var message = new StringBuilder(); // для приёма сообщений
-                    byte[] data = new byte[256]; // буфер для получаемых данных
+                    byte[] buffer = new byte[256]; // буфер для получаемых данных
 
                     do
                     {
-                        int bytes = listener.Receive(data); // количество полученных байтов
-                        message.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                        int bytes = listener.Receive(buffer); // количество полученных байтов
+                        message.Append(Encoding.Unicode.GetString(buffer, 0, bytes)); // принимаем информацию в виде байтовой последовательности
                     }
                     while (listener.Available > 0);
                     Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {message.ToString()}");
