@@ -1,5 +1,4 @@
-﻿using System.Data.SqlClient; // устанавливается через диспетчер пакетов NuGet
-using ServerClass;
+﻿using Server;
 
 Console.WriteLine("Добро пожаловать в настройки сервера CSA!\nВсе доступные команды можно узнать с помощью команды help\n\n");
 while (true)
@@ -13,6 +12,17 @@ void CheckCommand(string command)
 {
     switch (command.ToLower())
     {
+
+        #region forDebug
+        case ("load"):
+            var list = SqliteConnecter.Load();
+            foreach (var item in list)
+            {
+                Console.WriteLine($"{item.FirstName} {item.LastName}");
+            }
+            break;
+        #endregion // forDebug
+
         case ("help"):
             Console.WriteLine("Доступные команды: \nhelp - список доступных команд" +
                               "\ninfo - узнать текущие параметры сервера" +
