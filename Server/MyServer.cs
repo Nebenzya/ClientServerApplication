@@ -1,11 +1,13 @@
 ﻿using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 
 namespace Server
 {
     internal static class MyServer
     {
+        private static List<Student> students = null;
         private static string ip = "127.0.0.1";
         private static int port = 8080;
 
@@ -49,8 +51,6 @@ namespace Server
         static private Socket ConnectSocket()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            // связываем сокет с локальной точкой сервера, по которой будем принимать данные
             IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             socket.Bind(ipPoint);
 
@@ -65,7 +65,6 @@ namespace Server
             }
         }
 
-        // запускаем сервер и ставим в режим прослушивания
         static public void Start(int queue)
         {
             try
@@ -74,7 +73,6 @@ namespace Server
 
                 if (socket != null)
                 {
-                    // начинаем прослушивание с ограничением очереди
                     socket.Listen(queue);
                     Console.WriteLine("Сервер запущен. Ожидание подключения пользователя...");
                     ListenTo(socket);
@@ -92,23 +90,28 @@ namespace Server
             {
                 while (true)
                 {
-                    // режим ожидания нового подключения
                     Socket listener = socket.Accept();
 
-                    var message = new StringBuilder(); // для приёма сообщений
-                    byte[] buffer = new byte[256]; // буфер для получаемых данных
-
+                    var message = new StringBuilder();
+                    byte[] buffer = new byte[256];
                     do
                     {
-                        int bytes = listener.Receive(buffer); // количество полученных байтов
-                        message.Append(Encoding.Unicode.GetString(buffer, 0, bytes)); // принимаем информацию в виде байтовой последовательности
+                        int bytes = listener.Receive(buffer);
+                        message.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
                     }
                     while (listener.Available > 0);
                     Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {message.ToString()}");
 
-                    listener.Send(Encoding.Unicode.GetBytes("Сообщение получено")); // отправляем результат
-
-                    // закрываем и отключаем соединение
+                    switch (message.ToString())
+                    {
+                        case ("connect"):
+                            students = SqliteConnecter.Load();
+                            buffer = JsonSerializer.SerializeToUtf8Bytes(students);
+                            listener.Send(buffer);
+                            break;
+                        default:
+                            break;
+                    }
                     listener.Shutdown(SocketShutdown.Both);
                     listener.Close();
                 }

@@ -7,20 +7,23 @@ while (true)
     CheckCommand(Console.ReadLine());
 }
 
-//обрабатывает ввод пользователя на соответствие команд
 void CheckCommand(string command)
 {
     switch (command.ToLower())
     {
 
         #region forDebug
-        case ("load"):
-            var list = SqliteConnecter.Load();
-            foreach (var item in list)
-            {
-                Console.WriteLine($"{item.FirstName} {item.LastName}");
-            }
-            break;
+        //case ("load"):
+        //    var list = SqliteConnecter.Load();
+        //    foreach (var item in list)
+        //    {
+        //        Console.WriteLine($"{item.FullInfo}");
+        //    }
+        //    break;
+        //case ("save"):
+        //    var stud = new Student() { FirstName = "Maria", LastName = "Craft", BirthYear = 2001, Course = 1 };
+        //    SqliteConnecter.Save(stud);
+        //    break;
         #endregion // forDebug
 
         case ("help"):

@@ -5,22 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClientApp"
         mc:Ignorable="d"
-        Title="CSA" Height="450" Width="800">
-    <Grid>
-        <Grid.Background>
-            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                <LinearGradientBrush.RelativeTransform>
-                    <TransformGroup>
-                        <ScaleTransform CenterY="0.5" CenterX="0.5"/>
-                        <SkewTransform CenterX="0.5" CenterY="0.5"/>
-                        <RotateTransform Angle="-40" CenterX="0.5" CenterY="0.5"/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </LinearGradientBrush.RelativeTransform>
-                <GradientStop Color="#FF2E40B0"/>
-                <GradientStop Color="#FF71DEDF" Offset="1"/>
-            </LinearGradientBrush>
-        </Grid.Background>
+        Title="CSA" Height="450" Width="800" WindowStartupLocation="CenterScreen" Loaded="Window_Loaded">
+    <Grid Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition MaxHeight="30"/>
             <RowDefinition Height="*"/>
@@ -28,19 +14,13 @@
         </Grid.RowDefinitions>
 
         <!--Верхняя панель: Меню-->
-        <Menu Grid.Row="0" Height="30" VerticalAlignment="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="New Project" ></MenuItem>
-                <MenuItem Header="Open Project" >
-                    <MenuItem Header="WinForms"></MenuItem>
-                    <MenuItem Header="WPF" ></MenuItem>
-                </MenuItem>
-                <Separator />
-                <MenuItem Header="Exit" Click="Exit_Menu" ></MenuItem>
-            </MenuItem>
-            <MenuItem Header="Edit" ></MenuItem>
-            <MenuItem Header="View" ></MenuItem>
-        </Menu>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#FF53B2D2">
+            <Label Content="IP:" Foreground="White" Margin="5,0,0,0" />
+            <TextBox x:Name="textBoxIp" Width="80" Height="22"  Margin="0,0,0,2"/>
+            <Label Content="Port:" Foreground="White" Margin="5,0,0,0" />
+            <TextBox x:Name="textBoxPort" Width="80" Height="22"  Margin="0,0,0,2"/>
+            <Button x:Name="Button_Connect" Margin="10,0,0,2" Height="24" Width="90" Content="Подключиться" Click="Button_Connect_Click"/>
+        </StackPanel>
 
         <!--Центральное окно-->
         <Grid Grid.Row="1">
@@ -50,19 +30,19 @@
                 <ColumnDefinition Width="0.4*"/>
             </Grid.ColumnDefinitions>
             <ListBox Grid.Column="2" x:Name="lstNames" />
-            <GridSplitter Grid.Column="1" ShowsPreview="False" Width="3"
-        HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-            <DataGrid >
+            <GridSplitter Grid.Column="1" ShowsPreview="False" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
+            <DataGrid x:Name="dgList" AutoGenerateColumns="False" >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="# 1" Width="*"/>
-                    <DataGridTextColumn Header="# 2" Width="*"/>
-                    <DataGridTextColumn Header="# 3" Width="*"/>
+                    <DataGridTextColumn Header="Имя" Binding="{Binding Path = FirstName}" IsReadOnly="False" Width="*"/>
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=LastName}" IsReadOnly="False"  Width="*"/>
+                    <DataGridTextColumn Header="Год рождения" Binding="{Binding Path=BirthYear}" IsReadOnly="False"  Width="*"/>
+                    <DataGridTextColumn Header="Курс" Binding="{Binding Path=Course}" IsReadOnly="False"  Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
 
         <!--Нижняя панель: Информация-->
-        <Label Grid.Row="2" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center">Information</Label>
+        <Label Grid.Row="2" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center">Здесь могла быть ваша реклама!</Label>
 
     </Grid>
 </Window>
