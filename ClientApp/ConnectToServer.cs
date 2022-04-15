@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Windows;
 using System.Text.Json;
 using System.ComponentModel;
+using System;
 
 namespace ClientApp
 {
@@ -61,14 +62,14 @@ namespace ClientApp
         {
             try
             {
-                Socket socket = Connect();
+                Socket socket = _ToConnect();
 
                 if (socket != null)
                 {
                     byte[] data = Encoding.Unicode.GetBytes(message);
                     socket.Send(data);
 
-                    list = ReceiveMessage(socket);
+                    list = _ReceiveData(socket);
 
                     socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
@@ -80,24 +81,32 @@ namespace ClientApp
             }
         }
         #endregion // Public
-
         #region Private:
-        private static BindingList<Student> ReceiveMessage(Socket socket)
+        /// <summary>
+        /// Обрабатывает поступаемую информацию от сервера
+        /// </summary>
+        private static BindingList<Student> _ReceiveData(Socket socket)
         {
-            byte[] data = new byte[256];
+            // Этап согласованно получения данных:
+            // 1. получение информации о размере данных (одно целое число типа Int32)
+            byte[] size = new byte[4];
+            socket.Receive(size);
 
-            int bytes = socket.Receive(data, data.Length, 0);
+            // 2. получения данных в сериализованном виде (коллекция типа List<Student>)
+            byte[] data = new byte[BitConverter.ToInt32(size, 0)];
+            socket.Receive(data);
 
-
-            // TODO переработать прежде чем разкомментировать
-
-            //if (bytes > 0)
-            //    return JsonSerializer.Deserialize<BindingList<Student>>(data);
-            //else
-                return null;
+            if (BitConverter.ToInt32(size, 0) > 0)
+                return JsonSerializer.Deserialize<BindingList<Student>>(data);
+            else
+                return new BindingList<Student>();
         }
 
-        private static Socket Connect()
+        /// <summary>
+        /// Устанавливает соединение с сервером и уведомляет о результате. 
+        /// В случае неудачи возвращает null
+        /// </summary>
+        private static Socket _ToConnect()
         {
             if (IsCorrect)
             {

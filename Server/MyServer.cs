@@ -105,8 +105,13 @@ namespace Server
                     switch (message.ToString())
                     {
                         case ("connect"):
+
+                            // TODO вынести в отдельный метод
+
                             students = SqliteConnecter.Load();
                             buffer = JsonSerializer.SerializeToUtf8Bytes(students);
+                            byte[] size = BitConverter.GetBytes(buffer.Length);
+                            listener.Send(size);
                             listener.Send(buffer);
                             break;
                         default:

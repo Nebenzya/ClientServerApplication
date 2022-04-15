@@ -43,6 +43,7 @@ namespace ClientApp
             if (ConnectToServer.IsCorrect)
             {
                 ConnectToServer.SendMessage("connect",ref _ListStudents);
+                dgList.ItemsSource = _ListStudents;
             }
         }
     }
