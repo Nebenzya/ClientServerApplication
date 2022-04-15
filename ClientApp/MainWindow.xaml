@@ -20,23 +20,37 @@
             <Label Content="Port:" Foreground="White" Margin="5,0,0,0" />
             <TextBox x:Name="textBoxPort" Width="80" Height="22"  Margin="0,0,0,2"/>
             <Button x:Name="Button_Connect" Margin="10,0,0,2" Height="24" Width="90" Content="Подключиться" Click="Button_Connect_Click"/>
+
         </StackPanel>
 
         <!--Центральное окно-->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="143*"/>
+                <ColumnDefinition Width="47*"/>
                 <ColumnDefinition Width="2"/>
-                <ColumnDefinition Width="0.4*"/>
+                <ColumnDefinition Width="76*"/>
             </Grid.ColumnDefinitions>
-            <ListBox Grid.Column="2" x:Name="lstNames" />
-            <GridSplitter Grid.Column="1" ShowsPreview="False" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-            <DataGrid x:Name="dgList" AutoGenerateColumns="False" >
+            <StackPanel Grid.Column="3" Background="White">
+                <Label Content="Имя:"/>
+                <TextBox x:Name="nameTextBox" Margin="10,5"/>
+                <Label Content="Фамилия:"/>
+                <TextBox x:Name="lastnameTextBox" Margin="10,5"/>
+                <Label Content="Год рождения:"/>
+                <TextBox x:Name="yearTextBox" Margin="10,5"/>
+                <Label Content="Курс:" />
+                <TextBox x:Name="courseTextBox" Margin="10,5,10,20"/>
+                <Button x:Name="addButton" Height="20" MinWidth="50" MaxWidth="120" Content="Добавить" Click="AddButton_Click"/>
+                <Button x:Name="resetButton" Height="20" MinWidth="50" MaxWidth="120" Margin="10" Content="Очистить" Click="ResetButton_Click"/>
+                <Button x:Name="saveButton" Height="20" MinWidth="50" MaxWidth="120" Content="Сохранить" Click="SaveButton_Click"/>
+            </StackPanel>
+            <GridSplitter Grid.Column="2" ShowsPreview="False" Width="2" HorizontalAlignment="Center" />
+            <DataGrid x:Name="dgList" AutoGenerateColumns="False" Grid.ColumnSpan="2" >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Имя" Binding="{Binding Path = FirstName}" IsReadOnly="False" Width="*"/>
-                    <DataGridTextColumn Header="Фамилия" Binding="{Binding Path=LastName}" IsReadOnly="False"  Width="*"/>
-                    <DataGridTextColumn Header="Год рождения" Binding="{Binding Path=BirthYear}" IsReadOnly="False"  Width="*"/>
-                    <DataGridTextColumn Header="Курс" Binding="{Binding Path=Course}" IsReadOnly="False"  Width="*"/>
+                    <DataGridTextColumn Header="Имя" Binding="{Binding Path = FirstName}" IsReadOnly="True" Width="*"/>
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding Path = LastName}" IsReadOnly="True"  Width="*"/>
+                    <DataGridTextColumn Header="Год рождения" Binding="{Binding Path = BirthYear}" IsReadOnly="True"  Width="*"/>
+                    <DataGridTextColumn Header="Курс" Binding="{Binding Path = Course}" IsReadOnly="True"  Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
