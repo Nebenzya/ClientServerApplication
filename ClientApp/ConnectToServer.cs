@@ -1,9 +1,9 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows;
 using System.Text.Json;
-using System.ComponentModel;
 using System;
 
 namespace ClientApp
@@ -23,15 +23,15 @@ namespace ClientApp
             get { return _ip; }
             set 
             {
-                IPAddress forCheck;
-                if (IPAddress.TryParse(value, out forCheck))
+                if (IPAddress.TryParse(value, out _))
                 {
                     _ip = value;
+                    _isCorrect = true;
                 }
                 else
                 {
                     MessageBox.Show("Неверно указан IP-адрес!");
-                    IsCorrect = false;
+                    _isCorrect = false;
                 }
 
             }
@@ -42,34 +42,34 @@ namespace ClientApp
             get { return _port.ToString(); }
             set 
             {
-                int x;
-                if (int.TryParse(value, out x))
+                if (int.TryParse(value, out _))
                 {
                     _port = int.Parse(value);
+                    _isCorrect = true;
                 }
                 else
                 {
                     MessageBox.Show("Неверно указан порт!");
-                    IsCorrect = false;
+                    _isCorrect = false;
                 }
                  
             }
         }
 
-        public static bool IsCorrect { get => _isCorrect; set => _isCorrect = value; }
+        public static bool IsCorrect { get => _isCorrect; }
 
-        public static void SendMessage(string message,ref BindingList<Student> list )
+        public static void SendMessage(string message,ref List<Student> listStudents )
         {
             try
             {
-                Socket socket = _ToConnect();
+                Socket socket = ToConnect();
 
                 if (socket != null)
                 {
                     byte[] data = Encoding.Unicode.GetBytes(message);
                     socket.Send(data);
 
-                    list = _ReceiveData(socket);
+                    listStudents = ReceiveData(socket);
 
                     socket.Shutdown(SocketShutdown.Both);
                     socket.Close();
@@ -81,13 +81,14 @@ namespace ClientApp
             }
         }
         #endregion // Public
+
         #region Private:
         /// <summary>
         /// Обрабатывает поступаемую информацию от сервера
         /// </summary>
-        private static BindingList<Student> _ReceiveData(Socket socket)
+        private static List<Student> ReceiveData(Socket socket)
         {
-            // Этап согласованно получения данных:
+            // Этап согласованно приёма данных:
             // 1. получение информации о размере данных (одно целое число типа Int32)
             byte[] size = new byte[4];
             socket.Receive(size);
@@ -97,16 +98,16 @@ namespace ClientApp
             socket.Receive(data);
 
             if (BitConverter.ToInt32(size, 0) > 0)
-                return JsonSerializer.Deserialize<BindingList<Student>>(data);
+                return JsonSerializer.Deserialize<List<Student>>(data);
             else
-                return new BindingList<Student>();
+                return new List<Student>();
         }
 
         /// <summary>
         /// Устанавливает соединение с сервером и уведомляет о результате. 
         /// В случае неудачи возвращает null
         /// </summary>
-        private static Socket _ToConnect()
+        private static Socket ToConnect()
         {
             if (IsCorrect)
             {

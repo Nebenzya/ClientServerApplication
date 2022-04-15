@@ -7,7 +7,7 @@ while (true)
     CheckCommand(Console.ReadLine());
 }
 
-void CheckCommand(string command)
+static void CheckCommand(string command)
 {
     switch (command.ToLower())
     {
@@ -42,7 +42,7 @@ void CheckCommand(string command)
             break;
         case ("set port"):
             Console.Write("Введите порт: ");
-            MyServer.Port = Int32.Parse(Console.ReadLine());
+            MyServer.Port = int.Parse(Console.ReadLine());
             break;
         case ("exit"):
             Environment.Exit(0);

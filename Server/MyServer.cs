@@ -7,7 +7,7 @@ namespace Server
 {
     internal static class MyServer
     {
-        private static List<Student> students = null;
+        private static List<Student>? students;
         private static string ip = "127.0.0.1";
         private static int port = 8080;
 
@@ -16,9 +16,7 @@ namespace Server
             get => ip;
             set
             {
-                IPAddress forCheck = null; // заглушка для метода TryParse
-
-                if (IPAddress.TryParse(value,out forCheck))
+                if (IPAddress.TryParse(value, out _))
                 {
                     ip = value;
                     Console.WriteLine($"IP адресс успешно изменён на: {ip}\n");
@@ -48,10 +46,10 @@ namespace Server
             Console.WriteLine($"ip:\t{IP}\nport:\t{Port}\n");
         }
 
-        static private Socket ConnectSocket()
+        static private Socket? ConnectSocket()
         {
-            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+            Socket socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint ipPoint = new(IPAddress.Parse(ip), port);
             socket.Bind(ipPoint);
 
             if (socket != null)
@@ -93,14 +91,16 @@ namespace Server
                     Socket listener = socket.Accept();
 
                     var message = new StringBuilder();
-                    byte[] buffer = new byte[256];
+                    byte[] size = new byte[4];
+                    byte[] buffer = new byte[64];
                     do
                     {
                         int bytes = listener.Receive(buffer);
                         message.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
                     }
                     while (listener.Available > 0);
-                    Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {message.ToString()}");
+                    Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {message}");
+
 
                     switch (message.ToString())
                     {
@@ -110,9 +110,27 @@ namespace Server
 
                             students = SqliteConnecter.Load();
                             buffer = JsonSerializer.SerializeToUtf8Bytes(students);
-                            byte[] size = BitConverter.GetBytes(buffer.Length);
+                            size = BitConverter.GetBytes(buffer.Length);
                             listener.Send(size);
                             listener.Send(buffer);
+                            break;
+                        case ("save"):
+                            // Этап согласованно получения данных:
+                            // 1. получение информации о размере данных (одно целое число типа Int32)
+                            socket.Receive(size);
+
+                            // 2. получения данных в сериализованном виде (коллекция типа List<Student>)
+                            byte[] data = new byte[BitConverter.ToInt32(size, 0)];
+                            socket.Receive(data);
+
+                            if (BitConverter.ToInt32(size, 0) > 0)
+                            {
+                                students = JsonSerializer.Deserialize<List<Student>>(data);
+                                foreach (Student? item in students)
+                                {
+                                    SqliteConnecter.Save(item);
+                                }
+                            }
                             break;
                         default:
                             break;
