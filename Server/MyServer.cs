@@ -7,19 +7,20 @@ namespace Server
 {
     internal static class MyServer
     {
-        private static List<Student>? students;
-        private static string ip = "127.0.0.1";
-        private static int port = 8080;
+        private static Socket? _socket;
+        private static string _ip = "127.0.0.1";
+        private static int _port = 8080;
+        private static List<Student>? _students;
 
         public static string IP
         {
-            get => ip;
+            get => _ip;
             set
             {
                 if (IPAddress.TryParse(value, out _))
                 {
-                    ip = value;
-                    Console.WriteLine($"IP адресс успешно изменён на: {ip}\n");
+                    _ip = value;
+                    Console.WriteLine($"IP адресс успешно изменён на: {_ip}\n");
                 }
                 else
                     Console.WriteLine($"IP адресс не удалось изменить на: {value}\n");
@@ -28,13 +29,13 @@ namespace Server
 
         public static int Port
         {
-            get => port;
+            get => _port;
             set
             {
                 if (0 <= value && value < 65536)
                 {
-                    port = value;
-                    Console.WriteLine($"Порт успешно изменён на: {port}\n");
+                    _port = value;
+                    Console.WriteLine($"Порт успешно изменён на: {_port}\n");
                 }
                 else 
                     Console.WriteLine("Неверный значение для порта. Корректное значение в диапазоне 0-65535\n");
@@ -46,34 +47,24 @@ namespace Server
             Console.WriteLine($"ip:\t{IP}\nport:\t{Port}\n");
         }
 
-        static private Socket? ConnectSocket()
+        static private void ConnectSocket()
         {
-            Socket socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint ipPoint = new(IPAddress.Parse(ip), port);
-            socket.Bind(ipPoint);
-
-            if (socket != null)
-            {
-                return socket;
-            }
-            else
-            {
-                System.Console.WriteLine("Не получилось установить точку доступа! Проверьте настройки подключения...");
-                return null;
-            }
+            _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint ipPoint = new(IPAddress.Parse(_ip), _port);
+            _socket.Bind(ipPoint);
         }
 
         static public void Start(int queue)
         {
             try
             {
-                Socket socket = ConnectSocket();
+                ConnectSocket();
 
-                if (socket != null)
+                if (_socket != null && !(_socket.Connected))
                 {
-                    socket.Listen(queue);
+                    _socket.Listen(queue);
                     Console.WriteLine("Сервер запущен. Ожидание подключения пользователя...");
-                    ListenTo(socket);
+                    ListenTo();
                 }                
             }
             catch (Exception ex)
@@ -82,51 +73,51 @@ namespace Server
             }
         }
 
-        static private void ListenTo(Socket socket)
+        static private void ListenTo()
         {
             try
             {
                 while (true)
                 {
-                    Socket listener = socket.Accept();
+                    Socket socketForAccept = _socket.Accept();
 
                     var message = new StringBuilder();
-                    byte[] size = new byte[4];
-                    byte[] buffer = new byte[64];
+                    byte[] buffer = new byte[256];
                     do
                     {
-                        int bytes = listener.Receive(buffer);
-                        message.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
+                        int countBytes = socketForAccept.Receive(buffer);
+                        message.Append(Encoding.Unicode.GetString(buffer, 0, countBytes));
                     }
-                    while (listener.Available > 0);
+                    while (socketForAccept.Available > 0);
                     Console.WriteLine($"{DateTime.Now.ToLongTimeString()}: {message}");
 
 
+                    byte[] size = new byte[4];
                     switch (message.ToString())
                     {
                         case ("connect"):
 
                             // TODO вынести в отдельный метод
 
-                            students = SqliteConnecter.Load();
-                            buffer = JsonSerializer.SerializeToUtf8Bytes(students);
+                            _students = SqliteConnecter.Load();
+                            buffer = JsonSerializer.SerializeToUtf8Bytes(_students);
                             size = BitConverter.GetBytes(buffer.Length);
-                            listener.Send(size);
-                            listener.Send(buffer);
+                            socketForAccept.Send(size);
+                            socketForAccept.Send(buffer);
                             break;
                         case ("save"):
                             // Этап согласованно получения данных:
                             // 1. получение информации о размере данных (одно целое число типа Int32)
-                            socket.Receive(size);
+                            socketForAccept.Receive(size);
 
                             // 2. получения данных в сериализованном виде (коллекция типа List<Student>)
                             byte[] data = new byte[BitConverter.ToInt32(size, 0)];
-                            socket.Receive(data);
+                            socketForAccept.Receive(data);
 
                             if (BitConverter.ToInt32(size, 0) > 0)
                             {
-                                students = JsonSerializer.Deserialize<List<Student>>(data);
-                                foreach (Student? item in students)
+                                _students = JsonSerializer.Deserialize<List<Student>>(data);
+                                foreach (Student? item in _students)
                                 {
                                     SqliteConnecter.Save(item);
                                 }
@@ -135,8 +126,8 @@ namespace Server
                         default:
                             break;
                     }
-                    listener.Shutdown(SocketShutdown.Both);
-                    listener.Close();
+                    socketForAccept.Shutdown(SocketShutdown.Both);
+                    socketForAccept.Close();
                 }
             }
             catch (Exception ex)
