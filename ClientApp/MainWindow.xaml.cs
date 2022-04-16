@@ -8,7 +8,8 @@ namespace ClientApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<Student> _listToSaveStudents = new List<Student>(); // для хранения всего списка из базы данных
+        private List<Student> _listMainStudents = new List<Student>(); // основной список, который отображается на экране
+        private List<Student> _listToSaveStudents = new List<Student>(); // список для хранения новых объектов
 
         public MainWindow()
         {
@@ -24,8 +25,8 @@ namespace ClientApp
 
             if (ConnectToServer.IsCorrect)
             {
-                _listToSaveStudents = ConnectToServer.ReceiveData("connect");
-                dgList.ItemsSource = _listToSaveStudents;
+                _listMainStudents = ConnectToServer.ReceiveData("connect");
+                dgList.ItemsSource = _listMainStudents;
             }
         }
 
@@ -57,7 +58,9 @@ namespace ClientApp
 
             dgList.ItemsSource = null;
             _listToSaveStudents.Add(student);
-            dgList.ItemsSource = _listToSaveStudents;
+            _listMainStudents.Add(student);
+
+            dgList.ItemsSource = _listMainStudents;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
