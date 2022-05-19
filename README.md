@@ -8,8 +8,7 @@
 - Передача информации в виде целых объектов посредством сериализации *Json* и последующем хранение в используемой базе данных.
 - Возможность просматривать и редактировать информацию конечным пользователем.
 
-###  	:eyes: Как это выглядит:
+###  	:eyes: 
 
 ![Сервер](https://github.com/Pechenuyha/ClientServerApplication/blob/master/screens/server_app_screen.png)
 ![Клиент](https://github.com/Pechenuyha/ClientServerApplication/blob/master/screens/client_app_screen.png)
-![База данных](https://github.com/Pechenuyha/ClientServerApplication/blob/master/screens/sql_db_screen.png)
